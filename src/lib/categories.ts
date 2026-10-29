@@ -3,6 +3,14 @@ export const EXPENSE_CATEGORIES = ["餐飲", "交通", "購物", "娛樂", "居�
 export const INCOME_CATEGORIES = ["薪資", "獎金", "投資", "其他"] as const;
 
 export const ALL_CATEGORIES = Array.from(new Set([...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES]));
+export type Category = (typeof ALL_CATEGORIES)[number];
 
 export const TRANSACTION_TYPES = ["income", "expense"] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
+
+export const TYPE_LABELS: Record<TransactionType, string> = { income: "收入", expense: "支出" };
+
+// 依收入或支出取得可選的分類
+export function categoriesFor(type: TransactionType): readonly string[] {
+  return type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+}
