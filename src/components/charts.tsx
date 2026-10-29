@@ -17,7 +17,7 @@ function changeText(current: number, previous: number) {
   return `比上月${pct > 0 ? "增加" : "減少"} ${Math.abs(pct)}%`;
 }
 
-export function SummaryTiles({ stats }: { stats: StatsDTO }) {
+export function SummaryTiles({ stats }: { stats: Pick<StatsDTO, "income" | "expense" | "balance" | "count" | "previous"> }) {
   const tiles = [
     { label: "收入", value: stats.income, color: "text-emerald-600", change: changeText(stats.income, stats.previous.income) },
     { label: "支出", value: stats.expense, color: "text-rose-500", change: changeText(stats.expense, stats.previous.expense) },

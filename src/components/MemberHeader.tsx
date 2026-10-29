@@ -11,7 +11,7 @@ const memberLinks = [
   { href: "/dashboard", label: "儀表板", ready: true },
   { href: "/transactions", label: "收支管理", ready: true },
   { href: "/stats", label: "分類統計", ready: true },
-  { href: "/ai-analysis", label: "AI 分析", ready: false },
+  { href: "/ai-analysis", label: "AI 分析", ready: true },
 ];
 
 export default function MemberHeader() {
