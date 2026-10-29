@@ -3,38 +3,16 @@
 import { useEffect, useState } from "react";
 import { TYPE_LABELS, type TransactionType } from "@/lib/categories";
 import type { TransactionDTO } from "@/lib/transactions";
+import { currentMonth, formatDate, formatMonth, money, today } from "@/lib/format";
+import MonthSwitcher from "./MonthSwitcher";
 import TransactionForm from "./TransactionForm";
 
 type Filter = "all" | TransactionType;
 
-const money = new Intl.NumberFormat("zh-TW", { style: "currency", currency: "TWD", minimumFractionDigits: 0, maximumFractionDigits: 2 });
-
-// 以使用者裝置的當地時間取得今天、本月
-function today() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function shiftMonth(month: string, diff: number) {
-  const [y, m] = month.split("-").map(Number);
-  const d = new Date(y, m - 1 + diff, 1);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function formatMonth(month: string) {
-  const [y, m] = month.split("-");
-  return `${y} 年 ${Number(m)} 月`;
-}
-
-function formatDate(date: string) {
-  const [, m, d] = date.split("-");
-  return `${Number(m)}/${Number(d)}`;
-}
-
 type LoadResult = { month: string; transactions: TransactionDTO[]; error: string };
 
 export default function TransactionsManager() {
-  const [month, setMonth] = useState(() => today().slice(0, 7));
+  const [month, setMonth] = useState(currentMonth);
   const [filter, setFilter] = useState<Filter>("all");
   const [result, setResult] = useState<LoadResult | null>(null);
   // 新增、修改、刪除後加 1，觸發重新載入
@@ -95,7 +73,7 @@ export default function TransactionsManager() {
   }
 
   // 新增時，預設日期：本月就用今天，其他月份用該月 1 日
-  const defaultDate = month === today().slice(0, 7) ? today() : `${month}-01`;
+  const defaultDate = month === currentMonth() ? today() : `${month}-01`;
 
   return (
     <div className="space-y-6">
@@ -116,39 +94,21 @@ export default function TransactionsManager() {
         </button>
       </div>
 
-      {/* 月份切換 */}
-      <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-2">
-        <button type="button" onClick={() => setMonth(shiftMonth(month, -1))} className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100" aria-label="上個月">
-          ‹ 上個月
-        </button>
-        <label className="relative font-semibold text-slate-900">
-          {formatMonth(month)}
-          <input
-            type="month"
-            value={month}
-            onChange={(e) => e.target.value && setMonth(e.target.value)}
-            className="absolute inset-0 cursor-pointer opacity-0"
-            aria-label="選擇月份"
-          />
-        </label>
-        <button type="button" onClick={() => setMonth(shiftMonth(month, 1))} className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100" aria-label="下個月">
-          下個月 ›
-        </button>
-      </div>
+      <MonthSwitcher month={month} onChange={setMonth} />
 
       {/* 本月摘要 */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
           <p className="text-xs text-slate-500 sm:text-sm">收入</p>
-          <p className="mt-1 truncate text-base font-bold text-emerald-600 sm:text-xl">{money.format(income)}</p>
+          <p className="mt-1 break-all text-[15px] font-bold leading-tight tabular-nums text-emerald-600 sm:text-xl">{money.format(income)}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
           <p className="text-xs text-slate-500 sm:text-sm">支出</p>
-          <p className="mt-1 truncate text-base font-bold text-rose-500 sm:text-xl">{money.format(expense)}</p>
+          <p className="mt-1 break-all text-[15px] font-bold leading-tight tabular-nums text-rose-500 sm:text-xl">{money.format(expense)}</p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
           <p className="text-xs text-slate-500 sm:text-sm">結餘</p>
-          <p className={`mt-1 truncate text-base font-bold sm:text-xl ${income - expense < 0 ? "text-rose-500" : "text-slate-900"}`}>
+          <p className={`mt-1 break-all text-[15px] font-bold leading-tight tabular-nums sm:text-xl ${income - expense < 0 ? "text-rose-500" : "text-slate-900"}`}>
             {money.format(income - expense)}
           </p>
         </div>

@@ -7,7 +7,7 @@ import { monthString, parseJson, transactionSchema } from "@/lib/validators";
 import { Transaction } from "@/models/Transaction";
 
 // GET /api/transactions：查詢自己的收支紀錄
-// 可選的篩選條件：?month=2026-10&type=expense&category=餐飲
+// 可選的篩選條件：?month=2026-10&type=expense&category=餐飲&limit=5
 export async function GET(request: NextRequest) {
   await connection();
 
@@ -44,8 +44,18 @@ export async function GET(request: NextRequest) {
       filter.category = category;
     }
 
+    // 最多回傳幾筆（1～1000，預設 1000）
+    let limit = 1000;
+    const limitParam = params.get("limit");
+    if (limitParam) {
+      limit = Number(limitParam);
+      if (!Number.isInteger(limit) || limit < 1 || limit > 1000) {
+        return Response.json({ message: "limit 必須是 1～1000 的整數" }, { status: 400 });
+      }
+    }
+
     await connectDB();
-    const docs = await Transaction.find(filter).sort({ date: -1, createdAt: -1 }).limit(1000).lean();
+    const docs = await Transaction.find(filter).sort({ date: -1, createdAt: -1 }).limit(limit).lean();
 
     return Response.json({ transactions: docs.map(toTransactionDTO) });
   } catch (err) {
